@@ -1,18 +1,20 @@
 # FinanceMate
 
-![FinanceMate Logo](client/src/assets/logo.png)
+![FinanceMate Logo](client/src/assets/finance-mate-logo.webp)
 
 **FinanceMate** adalah aplikasi manajemen keuangan pribadi yang komprehensif yang membantu Anda melacak pengeluaran, mengatur anggaran, mengelola langganan, dan mencapai tujuan keuangan Anda dengan mudah dan efisien.
 
 ## Fitur Utama
 
 ### Dashboard Keuangan Interaktif
+
 - **Ringkasan Real-time**: Lihat saldo, arus kas, dan metrik keuangan utama dalam satu tampilan
 - **Kartu Informasi Keuangan**: Widget yang menampilkan statistik penting seperti total pengeluaran, pendapatan, dan sisa anggaran
 - **Grafik Interaktif**: Visualisasi tren keuangan harian, mingguan, dan bulanan
 - **Indikator Kinerja Keuangan**: Metrik kesehatan keuangan yang mudah dipahami
 
 ### Manajemen Transaksi Lengkap
+
 - **Pencatatan Cepat**: Tambahkan transaksi baru dengan mudah melalui form yang intuitif
 - **Kategorisasi Otomatis**: Sistem cerdas yang mengkategorikan transaksi berdasarkan pola sebelumnya
 - **Import/Export Data**: Dukung impor dari CSV bank dan ekspor data untuk laporan
@@ -20,6 +22,7 @@
 - **Split Transaksi**: Kemampuan untuk membagi satu transaksi ke beberapa kategori berbeda
 
 ### Pengelolaan Anggaran yang Fleksibel
+
 - **Anggaran per Kategori**: Tetapkan batas pengeluaran untuk setiap kategori
 - **Periode yang Dapat Disesuaikan**: Pilih anggaran mingguan, bulanan, atau kustom
 - **Alert & Notifikasi**: Dapatkan peringatan saat mendekati atau melebihi batas anggaran
@@ -27,6 +30,7 @@
 - **Rollover Budget**: Opsi untuk mentransfer saldo anggaran yang tidak terpakai ke periode berikutnya
 
 ### Manajemen Langganan yang Cerdas
+
 - **Pelacakan Otomatis**: Identifikasi dan lacak pembayaran berulang secara otomatis
 - **Kalender Langganan**: Lihat jadwal pembayaran dalam tampilan kalender
 - **Pengingat Jatuh Tempo**: Notifikasi sebelum tanggal pembayaran
@@ -34,6 +38,7 @@
 - **Rekomendasi Penghematan**: Saran untuk mengoptimalkan biaya langganan
 
 ### Tujuan Keuangan & Tabungan
+
 - **Penetapan Tujuan**: Buat tujuan keuangan dengan target jumlah dan tenggat waktu
 - **Progress Visual**: Lihat kemajuan tujuan dengan indikator persentase dan grafik
 - **Strategi Pendanaan**: Alokasikan dana secara otomatis ke tujuan dari pendapatan
@@ -41,6 +46,7 @@
 - **Proyeksi Pencapaian**: Prediksi kapan tujuan keuangan akan tercapai berdasarkan pola tabungan
 
 ### Analisis & Wawasan Keuangan
+
 - **Laporan Komprehensif**: Laporan pendapatan/pengeluaran, arus kas, dan nilai bersih
 - **Tren Pengeluaran**: Analisis pola belanja dari waktu ke waktu
 - **Prediksi Keuangan**: Perkiraan pendapatan dan pengeluaran masa depan
@@ -48,6 +54,7 @@
 - **Insight Keuangan**: Tips dan saran berdasarkan pola keuangan Anda
 
 ### Keamanan & Privasi
+
 - **Enkripsi End-to-End**: Perlindungan data keuangan yang ketat
 - **Autentikasi Multi-faktor**: Lapisan keamanan tambahan untuk akun Anda
 - **Sinkronisasi Aman**: Integrasi yang aman dengan rekening bank melalui API
@@ -57,6 +64,7 @@
 ## Teknologi yang Digunakan
 
 ### Frontend
+
 - **React 19**: Library JavaScript untuk membangun antarmuka pengguna
 - **TypeScript**: Pengetikan statis untuk pengembangan yang lebih aman
 - **Material UI versi 7**: Framework komponen UI modern
@@ -65,6 +73,7 @@
 - **Axios**: Klien HTTP untuk API requests
 
 ### Backend
+
 - **Node.js**: Runtime JavaScript untuk server
 - **Express.js**: Framework web yang cepat dan minimal
 - **Supabase**: Platform backend-as-a-service dengan PostgreSQL
@@ -73,6 +82,7 @@
 - **Joi**: Validasi data skema
 
 ### Database & Penyimpanan
+
 - **PostgreSQL**: Database relasional yang kuat melalui Supabase
 - **Supabase Storage**: Penyimpanan file untuk lampiran dan bukti transaksi
 
@@ -154,6 +164,7 @@ Frontend akan berjalan di http://localhost:3000 dan backend di http://localhost:
 ### Konfigurasi Lingkungan
 
 #### Frontend (.env.local):
+
 ```
 REACT_APP_API_URL=http://localhost:5000/api
 REACT_APP_SUPABASE_URL=your_supabase_url
@@ -161,6 +172,7 @@ REACT_APP_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 #### Backend (.env):
+
 ```
 PORT=5000
 NODE_ENV=development
@@ -172,13 +184,17 @@ SUPABASE_KEY=your_supabase_service_role_key
 ## Deployment
 
 ### Frontend
+
 Silakan lihat [Frontend Deployment](client/README.md) untuk petunjuk lengkap deploy ke:
+
 - Netlify
 - Vercel
 - Firebase Hosting
 
 ### Backend
+
 Silakan lihat [Backend Deployment](server/README.md) untuk petunjuk lengkap deploy ke:
+
 - Heroku
 - Railway
 - DigitalOcean App Platform
