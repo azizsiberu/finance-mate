@@ -1,5 +1,10 @@
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
+const csv = require('csv-parser');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+const fs = require('fs');
+const path = require('path');
+const moment = require('moment');
 
 class TransactionController {
   /**
@@ -357,6 +362,221 @@ class TransactionController {
     } catch (error) {
       console.error('Summary error:', error);
       res.status(500).json({ error: 'Failed to get transaction summary' });
+    }
+  }
+
+  /**
+   * Import transactions from CSV file
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   */
+  static async importTransactions(req, res) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+      }
+
+      const userId = req.user.userId;
+      const { skipFirstRow = 'true', dateFormat = 'YYYY-MM-DD' } = req.body;
+      const skipHeader = skipFirstRow === 'true';
+      
+      const results = [];
+      const errors = [];
+      let rowCount = 0;
+
+      // Create a temporary file path
+      const csvFilePath = req.file.path;
+      
+      // Parse the CSV file
+      fs.createReadStream(csvFilePath)
+        .pipe(csv())
+        .on('data', (data) => {
+          rowCount++;
+          
+          // Skip header row if specified
+          if (skipHeader && rowCount === 1) {
+            return;
+          }
+
+          // Map CSV columns to transaction fields
+          // Customize this mapping based on your CSV structure
+          try {
+            const transaction = {
+              userId,
+              amount: parseFloat(data.amount || data.Amount || data.AMOUNT || 0),
+              type: (data.type || data.Type || data.TYPE || '').toLowerCase() === 'income' ? 'income' : 'expense',
+              category: data.category || data.Category || data.CATEGORY || 'Uncategorized',
+              description: data.description || data.Description || data.DESCRIPTION || '',
+              date: moment(data.date || data.Date || data.DATE, dateFormat).format('YYYY-MM-DD'),
+              isShared: false,
+              tags: data.tags || data.Tags || data.TAGS || ''
+            };
+
+            // Validate transaction data
+            if (isNaN(transaction.amount) || transaction.amount <= 0) {
+              throw new Error(`Invalid amount on row ${rowCount}`);
+            }
+
+            if (!moment(transaction.date, 'YYYY-MM-DD').isValid()) {
+              throw new Error(`Invalid date format on row ${rowCount}`);
+            }
+
+            results.push(transaction);
+          } catch (error) {
+            errors.push(`Row ${rowCount}: ${error.message}`);
+          }
+        })
+        .on('end', async () => {
+          // Delete the temporary file
+          fs.unlinkSync(csvFilePath);
+          
+          if (results.length === 0) {
+            return res.status(400).json({ 
+              message: 'No valid transactions found in the CSV file',
+              errors
+            });
+          }
+
+          try {
+            // Batch insert transactions
+            const insertedTransactions = await Transaction.bulkCreate(userId, results);
+            
+            res.status(201).json({ 
+              message: `Successfully imported ${results.length} transactions`,
+              successCount: results.length,
+              errorCount: errors.length,
+              errors: errors.length > 0 ? errors : [],
+              transactions: insertedTransactions
+            });
+          } catch (err) {
+            console.error('Import error:', err);
+            res.status(500).json({ 
+              error: 'Failed to import transactions',
+              message: err.message
+            });
+          }
+        })
+        .on('error', (err) => {
+          // Delete the temporary file
+          if (fs.existsSync(csvFilePath)) {
+            fs.unlinkSync(csvFilePath);
+          }
+          
+          console.error('CSV parsing error:', err);
+          res.status(500).json({ 
+            error: 'Failed to parse CSV file',
+            message: err.message
+          });
+        });
+    } catch (error) {
+      console.error('Import error:', error);
+      
+      // Clean up temporary file if it exists
+      if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      
+      res.status(500).json({ 
+        error: 'Failed to import transactions',
+        message: error.message
+      });
+    }
+  }
+
+  /**
+   * Export transactions to CSV file
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   */
+  static async exportTransactions(req, res) {
+    try {
+      const userId = req.user.userId;
+      const { 
+        startDate,
+        endDate,
+        type,
+        category,
+        format = 'csv' // Default format is CSV
+      } = req.query;
+
+      // Create filters for transactions
+      const filters = { 
+        startDate, 
+        endDate, 
+        type, 
+        category,
+        // Always include all transactions regardless of pagination
+        page: 1,
+        limit: 10000
+      };
+
+      // Get transactions based on filters
+      const { transactions } = await Transaction.findAll(userId, filters);
+
+      if (!transactions || transactions.length === 0) {
+        return res.status(404).json({ 
+          error: 'No transactions found for the specified criteria' 
+        });
+      }
+
+      // Standardize transactions for export
+      const formattedTransactions = transactions.map(transaction => ({
+        Date: transaction.transaction_date,
+        Type: transaction.type,
+        Category: transaction.category,
+        Amount: transaction.amount,
+        Description: transaction.description || '',
+        Tags: Array.isArray(transaction.tags) ? transaction.tags.join(', ') : transaction.tags || ''
+      }));
+
+      // Generate a filename with current date
+      const dateStr = moment().format('YYYY-MM-DD');
+      const filename = `transactions_export_${dateStr}.csv`;
+
+      // Create a temporary directory if it doesn't exist
+      const tempDir = path.join(__dirname, '..', 'temp');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir, { recursive: true });
+      }
+
+      // Path for the export file
+      const filePath = path.join(tempDir, filename);
+
+      // Create a CSV writer
+      const csvWriter = createCsvWriter({
+        path: filePath,
+        header: [
+          { id: 'Date', title: 'Date' },
+          { id: 'Type', title: 'Type' },
+          { id: 'Category', title: 'Category' },
+          { id: 'Amount', title: 'Amount' },
+          { id: 'Description', title: 'Description' },
+          { id: 'Tags', title: 'Tags' }
+        ]
+      });
+      
+      // Write data to CSV
+      await csvWriter.writeRecords(formattedTransactions);
+
+      // Send the file as a download
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
+      
+      // Stream the file to the response
+      const fileStream = fs.createReadStream(filePath);
+      fileStream.pipe(res);
+      
+      // Delete the file after sending
+      fileStream.on('end', () => {
+        fs.unlinkSync(filePath);
+      });
+      
+    } catch (error) {
+      console.error('Export error:', error);
+      res.status(500).json({ 
+        error: 'Failed to export transactions',
+        message: error.message
+      });
     }
   }
 }

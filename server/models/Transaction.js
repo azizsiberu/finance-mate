@@ -33,6 +33,42 @@ class Transaction {
   }
 
   /**
+   * Create multiple transactions at once (bulk insert)
+   * @param {string} userId - User ID
+   * @param {Array<object>} transactions - Array of transaction data
+   * @returns {Promise<Array<object>>} - Created transactions
+   */
+  static async bulkCreate(userId, transactions) {
+    try {
+      // Format each transaction for database insertion
+      const formattedTransactions = transactions.map(transaction => ({
+        user_id: userId,
+        amount: parseFloat(transaction.amount),
+        type: transaction.type,
+        category: transaction.category,
+        description: transaction.description || '',
+        transaction_date: transaction.date,
+        is_shared: transaction.isShared || false,
+        tags: transaction.tags || [],
+        shared_from: transaction.sharedFrom || null
+      }));
+      
+      // Perform bulk insert
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert(formattedTransactions)
+        .select();
+      
+      if (error) throw new Error(error.message);
+      
+      return data;
+    } catch (error) {
+      console.error('Error bulk creating transactions:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Find a transaction by ID for a specific user
    * @param {string} id - Transaction ID
    * @param {string} userId - User ID

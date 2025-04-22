@@ -1,11 +1,32 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const TransactionController = require('../controllers/transactionController');
 const { authenticate } = require('../middlewares/auth');
 const { validateTransaction } = require('../middlewares/validation');
 
+// Configure multer for file uploads
+const upload = multer({
+  dest: 'temp/',
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max file size
+  fileFilter: (req, file, cb) => {
+    // Accept only CSV files
+    if (file.mimetype === 'text/csv' || file.mimetype === 'application/vnd.ms-excel') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only CSV files are allowed'), false);
+    }
+  }
+});
+
 // Create a new transaction
 router.post('/', authenticate, validateTransaction, TransactionController.createTransaction);
+
+// Import transactions from CSV
+router.post('/import', authenticate, upload.single('file'), TransactionController.importTransactions);
+
+// Export transactions to CSV
+router.get('/export', authenticate, TransactionController.exportTransactions);
 
 // Get all transactions for current user
 router.get('/', authenticate, TransactionController.getAllTransactions);
