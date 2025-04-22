@@ -2,7 +2,7 @@
 
 ![FinanceMate Logo](client/src/assets/finance-mate-logo.webp)
 
-**FinanceMate** adalah aplikasi manajemen keuangan pribadi yang komprehensif yang membantu Anda melacak pengeluaran, mengatur anggaran, mengelola langganan, dan mencapai tujuan keuangan Anda dengan mudah dan efisien.
+**FinanceMate** adalah aplikasi manajemen keuangan pribadi untuk pasangan muda yang komprehensif yang membantu Anda melacak pengeluaran, mengatur anggaran, mengelola langganan, dan mencapai tujuan keuangan Anda dengan mudah dan efisien.
 
 ## Fitur Utama
 
