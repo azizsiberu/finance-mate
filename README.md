@@ -228,3 +228,25 @@ Kami sangat terbuka dengan kontribusi! Silakan fork repositori ini, buat branch 
 - **Issues**: Buka issue di GitHub untuk bug dan permintaan fitur
 - **Discord**: Bergabunglah dengan komunitas kami di [Discord FinanceMate](https://discord.gg/financematecommunity)
 - **Twitter**: [@FinanceMateApp](https://twitter.com/financemateapp)
+
+### File Upload Features
+
+#### Upload Profile Picture
+- **Endpoint**: `POST /users/upload-profile-picture`
+- **Description**: Allows users to upload a profile picture.
+- **Headers**:
+  - `Authorization`: Bearer token for authentication.
+- **Body**:
+  - `profilePicture`: File (multipart/form-data).
+- **Response**:
+  - `200 OK`: Returns the URL of the uploaded profile picture.
+
+#### Upload File for Goals
+- **Endpoint**: `POST /goals/:goalId/upload-file`
+- **Description**: Allows users to upload a file related to a specific goal.
+- **Headers**:
+  - `Authorization`: Bearer token for authentication.
+- **Body**:
+  - `goalFile`: File (multipart/form-data).
+- **Response**:
+  - `200 OK`: Returns the URL of the uploaded file.

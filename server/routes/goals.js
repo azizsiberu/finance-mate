@@ -1,24 +1,30 @@
 const express = require('express');
+const multer = require('multer');
+const { uploadGoalFile } = require('../controllers/goalController');
+const authMiddleware = require('../middlewares/auth');
+
 const router = express.Router();
-const { authenticate } = require('../middlewares/auth');
-const goalController = require('../controllers/goalController');
+const upload = multer(); // Middleware for handling multipart/form-data
 
 // Create a new financial goal
-router.post('/', authenticate, goalController.createGoal);
+router.post('/', authMiddleware, goalController.createGoal);
 
 // Get all financial goals for current user
-router.get('/', authenticate, goalController.getAllGoals);
+router.get('/', authMiddleware, goalController.getAllGoals);
 
 // Get financial goal by ID
-router.get('/:id', authenticate, goalController.getGoalById);
+router.get('/:id', authMiddleware, goalController.getGoalById);
 
 // Update financial goal
-router.put('/:id', authenticate, goalController.updateGoal);
+router.put('/:id', authMiddleware, goalController.updateGoal);
 
 // Delete financial goal
-router.delete('/:id', authenticate, goalController.deleteGoal);
+router.delete('/:id', authMiddleware, goalController.deleteGoal);
 
 // Add contribution to a goal
-router.post('/:id/contribute', authenticate, goalController.addContribution);
+router.post('/:id/contribute', authMiddleware, goalController.addContribution);
+
+// Route to upload a file for a goal
+router.post('/:goalId/upload-file', authMiddleware, upload.single('goalFile'), uploadGoalFile);
 
 module.exports = router;

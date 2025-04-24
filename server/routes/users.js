@@ -1,12 +1,13 @@
 const express = require('express');
+const multer = require('multer');
+const { uploadProfilePicture } = require('../controllers/authController');
+const authMiddleware = require('../middlewares/auth');
+
 const router = express.Router();
-const supabase = require('../config/supabase');
-const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
-const { authenticate } = require('../middlewares/auth');
+const upload = multer(); // Middleware for handling multipart/form-data
 
 // Send partner invitation
-router.post('/invite-partner', authenticate, async (req, res) => {
+router.post('/invite-partner', authMiddleware, async (req, res) => {
   try {
     const { partnerEmail } = req.body;
     const userId = req.user.userId;
@@ -359,5 +360,8 @@ router.put('/profile', authenticate, async (req, res) => {
     res.status(500).json({ error: 'Failed to update profile' });
   }
 });
+
+// Route to upload profile picture
+router.post('/upload-profile-picture', authMiddleware, upload.single('profilePicture'), uploadProfilePicture);
 
 module.exports = router;
