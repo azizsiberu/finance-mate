@@ -1,4 +1,9 @@
 const categorySeeder = require('./seeders/categorySeeder');
+const userSeeder = require('./seeders/userSeeder');
+const transactionSeeder = require('./seeders/transactionSeeder');
+const goalSeeder = require('./seeders/goalSeeder');
+const budgetSeeder = require('./seeders/budgetSeeder');
+const subscriptionSeeder = require('./seeders/subscriptionSeeder');
 const path = require('path');
 const fs = require('fs');
 
@@ -9,13 +14,20 @@ const runSeeders = async () => {
   console.log('Running all seeders');
 
   try {
-    // Run specific seeders
+    // Run specific seeders in order
+    // 1. Categories first as they're referenced by other tables
     await categorySeeder();
     
-    // Add more seeders here as they are developed
-    // await userSeeder();
-    // await transactionSeeder();
-    // etc.
+    // 2. Users second as they're referenced by all other tables
+    await userSeeder();
+    
+    // 3. Transactions, goals, subscriptions, and budgets can be seeded in parallel
+    await Promise.all([
+      transactionSeeder(),
+      goalSeeder(),
+      subscriptionSeeder(),
+      budgetSeeder()
+    ]);
 
     console.log('All seeders completed successfully!');
   } catch (error) {
