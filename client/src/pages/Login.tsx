@@ -1,8 +1,10 @@
-import React from 'react';
-import { Typography, Paper, Box, useMediaQuery, useTheme, Button, TextField } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Typography, Paper, Box, useMediaQuery, useTheme, Button, TextField, Alert, CircularProgress } from '@mui/material';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
-// Styled components with neobrutalism design
+// Styled components dengan desain neobrutalism
 const LoginContainer = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
@@ -157,7 +159,42 @@ const Login: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
-
+  const navigate = useNavigate();
+  
+  // Menggunakan auth context
+  const { login, isAuthenticated, loading, error, clearError } = useAuth();
+  
+  // State untuk form
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  
+  // Redirect ke homepage jika sudah login
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+  
+  // Handle login form submit
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormSubmitted(true);
+    
+    // Validasi form sederhana
+    if (!email || !password) {
+      return;
+    }
+    
+    // Call login function dari auth context
+    await login(email, password);
+  };
+  
+  // Handle navigate to register page
+  const handleRegisterClick = () => {
+    navigate('/register');
+  };
+  
   return (
     <LoginContainer>
       <NeoBrutalistPaper>
@@ -190,14 +227,35 @@ const Login: React.FC = () => {
           </NeoBrutalistTitle>
         </Box>
         
+        {/* Error Alert */}
+        {error && (
+          <Box mb={3}>
+            <Alert 
+              severity="error" 
+              onClose={clearError}
+              sx={{ 
+                border: '2px solid black',
+                borderRadius: '0',
+                fontWeight: 'bold'
+              }}
+            >
+              {error}
+            </Alert>
+          </Box>
+        )}
+        
         {/* Form Section */}
-        <form>
+        <form onSubmit={handleSubmit}>
           <NeoBrutalistTextField
             fullWidth
             label="Email"
             variant="outlined"
             margin="normal"
             InputProps={{ style: { fontWeight: 'bold' } }}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            error={formSubmitted && !email}
+            helperText={formSubmitted && !email ? "Email is required" : ""}
           />
           
           <NeoBrutalistTextField
@@ -207,14 +265,20 @@ const Login: React.FC = () => {
             variant="outlined"
             margin="normal"
             InputProps={{ style: { fontWeight: 'bold' } }}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            error={formSubmitted && !password}
+            helperText={formSubmitted && !password ? "Password is required" : ""}
           />
           
           <NeoBrutalistButton
             fullWidth
             variant="contained"
             size="large"
+            type="submit"
+            disabled={loading}
           >
-            Login
+            {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
           </NeoBrutalistButton>
         </form>
         
@@ -231,7 +295,10 @@ const Login: React.FC = () => {
               border: isDesktop ? '3px solid black' : '2px solid black'
             }}
           >
-            Don't have an account? <span style={{ color: '#ff45a0', textDecoration: 'underline', cursor: 'pointer' }}>Sign Up</span>
+            Don't have an account? <span 
+              style={{ color: '#ff45a0', textDecoration: 'underline', cursor: 'pointer' }}
+              onClick={handleRegisterClick}
+            >Sign Up</span>
           </Typography>
         </Box>
         

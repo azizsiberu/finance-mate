@@ -1,13 +1,16 @@
 const express = require('express');
 const multer = require('multer');
+const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+const supabase = require('../config/supabase');
 const { uploadProfilePicture } = require('../controllers/authController');
-const authMiddleware = require('../middlewares/auth');
+const { authenticate } = require('../middlewares/auth');
 
 const router = express.Router();
 const upload = multer(); // Middleware for handling multipart/form-data
 
 // Send partner invitation
-router.post('/invite-partner', authMiddleware, async (req, res) => {
+router.post('/invite-partner', authenticate, async (req, res) => {
   try {
     const { partnerEmail } = req.body;
     const userId = req.user.userId;
@@ -362,6 +365,6 @@ router.put('/profile', authenticate, async (req, res) => {
 });
 
 // Route to upload profile picture
-router.post('/upload-profile-picture', authMiddleware, upload.single('profilePicture'), uploadProfilePicture);
+router.post('/upload-profile-picture', authenticate, upload.single('profilePicture'), uploadProfilePicture);
 
 module.exports = router;
